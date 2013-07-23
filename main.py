@@ -19,6 +19,7 @@ def load_google_properties():
         return (url, api_key)
     except Exception, e:
         print "ERROR: An error occurred when reading tl.cfg google configuration: "+e
+        sys.exit(2)
 
 # Return mongodb connection properties from tl.cfg configuration file
 def load_mongodb_properties():
@@ -37,6 +38,7 @@ def load_mongodb_properties():
         return (host,port,user,password,data_collection,station_collection,crawled_time_collection)
     except Exception, e:
         print "ERROR: An error occurred when reading tl.cfg mongodb configuration: "+e
+        sys.exit(2)
         
 # Output path properties from tl.cfg configuration file
 def load_output_properties():
@@ -50,6 +52,7 @@ def load_output_properties():
         return (video_output_path,image_output_path)
     except Exception, e:
         print "ERROR: An error occurred when reading tl.cfg mongodb configuration: "+e
+        sys.exit(2)
 
 # Script help screen
 def print_script_help():
@@ -138,17 +141,25 @@ def get_pictures_from_range():
         db = connection[bike_system]
         # Collection to store crawled data is "data"
         collection = db[data_collection]
+        st_collection = db[station_collection]
         partial_time = tl_starttime + ((60/granularity)*60)
-        print partial_time
-        print datetime.datetime.fromtimestamp(1370818800.0)
-        cursor = collection.find({ "t": { "$gte": datetime.datetime.utcfromtimestamp(tl_starttime), "$lt": datetime.datetime.utcfromtimestamp(partial_time) }})
+        cursor = collection.find({ "t": { "$gte": datetime.datetime.fromtimestamp(tl_starttime), "$lt": datetime.datetime.fromtimestamp(partial_time) }})
         if cursor.count() == 0:
-                print ("INFO: New station found, added to stations collection\n\r")
+                print "ERROR: No crawled data in the specified time range"
+                sys.exit(2)
         else:
-                for val in cursor:
-                    print val[0]
+                marker_list = []
+                for station in cursor:
+                    # http://maps.googleapis.com/maps/api/staticmap?center=63.259591,-144.667969&zoom=6&size=400x400\
+                    #        &markers=color:blue%7Clabel:S%7C62.107733,-145.541936&markers=size:tiny%7Ccolor:green%7CDelta+Junction,AK\
+                    #        &markers=size:mid%7Ccolor:0xFFFF00%7Clabel:C%7CTok,AK&sensor=false" />
+                    # Each station_mark is a marker in the map
+                    print station['s']
+                # Call API to generate image
+ 
     except Exception, e:
-        print "ERROR: An error occurred when connecting to MongoDB: " + e
+        print "ERROR: An error occurred when connecting to MongoDB"
+        sys.exit(2)
     finally:
         connection.close()
         # Increase recursive function parameter
