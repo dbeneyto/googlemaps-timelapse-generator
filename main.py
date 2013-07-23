@@ -154,6 +154,8 @@ def get_pictures_from_range():
                     #        &markers=color:blue%7Clabel:S%7C62.107733,-145.541936&markers=size:tiny%7Ccolor:green%7CDelta+Junction,AK\
                     #        &markers=size:mid%7Ccolor:0xFFFF00%7Clabel:C%7CTok,AK&sensor=false" />
                     # Each station_mark is a marker in the map
+                    station_coordinates = st_collection.find({ "id": station['s'] },{ "location":1 }).limit(1)
+                    print station_coordinates['lon']
                     print station['s']
                 # Call API to generate image
  
